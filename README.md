@@ -59,21 +59,15 @@ This works brilliantly in development and all your tests will pass, however,
 production won't boot up! The file is being eager loaded and routes are no
 longer able to be defined. Oh no!
 
-So you put `gem 'marauders_map'` into your Gemfile and then create a declarative
-route file:
+So you put `gem 'marauders_map'` into your Gemfile and then wrap your routes:
 
-``` hcl
-resource "sorting_hat" {
-  only = "index"
-  
-  get "next_student" {
-    path = "next"
-    on = "member"
-  }
-}
+``` ruby
+MaraudersMap.draw do
+  # your Rails routes
+end
 ```
 
-This will be converted into a legit Rails route.
+The gem will do the rest.
 
 ## Installation
 
