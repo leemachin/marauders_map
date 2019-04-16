@@ -1,8 +1,79 @@
-# MaraudersMap
+# Marauder's Map
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/marauders_map`. To experiment with that code, run `bin/console` for an interactive prompt.
+**Domain Driven Rails Routes**
 
-TODO: Delete this and the text above, and describe your gem
+
+## Redefining your Routes
+
+By convention, Rails reads your routes file at the initialisation stage and
+then discards the routes API at run time. 
+
+As a Rails app grows in size and complexity, and as the teams maintain it grow
+larger, the traditional structure can leave something to be desired. One common
+approach at this point is to separate logically consistent routes into their own
+files, adding some extra code to draw those routes files from a `config/routes`
+folder or similar.
+
+What if you're shifting towards DDD though? It's becoming more popular to
+organise your code by domain or feature. 
+
+This is often done when building single page apps in React, in order to colocate
+relevant components, HOCs, graphql queries, styles, and images. It's a different
+approach to having a massive components folder, a massive styles folder, etc.
+
+This is more or less how Rails does it: all your models go in one folder, your
+controllers in another. Each have their own concerns folder. Other folders might
+appear if you start to use presenters, decorators, and other design patterns.
+
+The colocation pattern that is becoming more popular in Javascript-land is
+something that can work just as well in a Rails app that has a growing need for
+Service Oriented Architecture, or it's bosom buddy Domain Driven Development.
+
+For the most part Rails handles this okay: Ruby is Ruby, it doesn't matter where
+you put it, it is only driven by convention. This is not so with routes, which
+are only loaded on application startup.
+
+This means that colocating your routes will lead to runtime errors as Rails
+can't eager load those files: the API is no longer available to use, so you will
+encounter `NoMethodError`s that only exist in production (eager load is not the
+same as autoload).
+
+This gem takes inspiration from more enterprisey frameworks like Spring and
+Symfony, where routes are typically defined per service/bundle/domain and are
+also written in a serializable format like YAML or XML.
+
+Rails routes are quite dynamic, so the preference here is to use HCL to offer
+some similarity to Ruby.
+
+## Defining your new routes
+
+Suppose you have a domain responsible for making the Sorting Hat work, which is
+how Hogwarts students are assigned to their houses: Gryffindor, Hufflepuff, etc.
+All of the models, controllers, and business logic live in
+`app/domains/sorting_hat`.
+
+You want to move your routes there too so you make a new file:
+`app/domains/sorting_hat/routes.rb`.
+
+This works brilliantly in development and all your tests will pass, however,
+production won't boot up! The file is being eager loaded and routes are no
+longer able to be defined. Oh no!
+
+So you put `gem 'marauders_map'` into your Gemfile and then create a declarative
+route file:
+
+``` hcl
+resource "sorting_hat" {
+  only = "index"
+  
+  get "next_student" {
+    path = "next"
+    on = "member"
+  }
+}
+```
+
+This will be converted into a legit Rails route.
 
 ## Installation
 
@@ -20,9 +91,6 @@ Or install it yourself as:
 
     $ gem install marauders_map
 
-## Usage
-
-TODO: Write usage instructions here
 
 ## Development
 
